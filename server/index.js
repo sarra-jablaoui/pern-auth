@@ -32,7 +32,7 @@ app.post("/api/users", async (req, res) => {
 
     res.status(201).json(newUser.rows[0]);
   } catch (err) {
-    console.error("Erreur lors de l'ajout de l'utilisateur :", err.message);
+    console.error("Erreur lors de l'ajout de l'utilisateur :", err);
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
