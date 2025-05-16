@@ -1,29 +1,36 @@
 stages:
   - build
+  - test
   - deploy
 
 variables:
-  FRONT_IMAGE: sarra9/frontw
-  BACK_IMAGE: sarra9/backw
+  DOCKER_DRIVER: overlay2
 
-before_script:
-  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-
-build_backend:
+build-job:
   stage: build
   script:
-    - docker build -t $BACK_IMAGE ./server
-    - docker push $BACK_IMAGE
+    - echo "Check Docker version"
+    - docker version
+    - echo "Building Docker image..."
+    - docker build -t pern-app ./backend
+  tags:
+    - local-runner
 
-build_frontend:
-  stage: build
+test-job:
+  stage: test
   script:
-    - docker build -t $FRONT_IMAGE ./client
-    - docker push $FRONT_IMAGE
+    - echo "Running tests..."
+    - cd backend
+    - npm install
+    - npm test
+  tags:
+    - local-runner
 
-deploy:
+deploy-job:
   stage: deploy
-  only:
-    - main
   script:
-    - kubectl apply -f k8s/
+    - echo "Deploying to Minikube..."
+    - kubectl config use-context minikube
+    - kubectl apply -f ./k8s/
+  tags:
+    - local-runner
