@@ -1,0 +1,29 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  FRONT_IMAGE: sarra9/frontw
+  BACK_IMAGE: sarra9/backw
+
+before_script:
+  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+
+build_backend:
+  stage: build
+  script:
+    - docker build -t $BACK_IMAGE ./server
+    - docker push $BACK_IMAGE
+
+build_frontend:
+  stage: build
+  script:
+    - docker build -t $FRONT_IMAGE ./client
+    - docker push $FRONT_IMAGE
+
+deploy:
+  stage: deploy
+  only:
+    - main
+  script:
+    - kubectl apply -f k8s/
